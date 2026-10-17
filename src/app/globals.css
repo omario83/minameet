@@ -1,26 +1,78 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-display: var(--font-fraunces);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Merk: oranje */
+  --color-brand: #c8410b; /* terracotta: knoppen en links, witte tekst erop */
+  --color-brand-soft: #ffe9d2;
+  --color-orange: #ff8a00; /* hoofdkleur, donkere tekst erop */
+  --color-gold: #ffb400;
+  --color-sun: #ffd43b;
+  --color-lemon: #fff4a3;
+  --color-tangerine: #ff6a2b;
+
+  /* Natuur */
+  --color-forest: #1f4a38;
+  --color-sage: #8fae8b;
+  --color-sky: #5aa9e6;
+
+  /* Basis */
+  --color-cream: #fff8ec;
+  --color-sand: #f3e6d3;
+  --color-ink: #1e1611;
+  --color-stone: #6f6259;
+
+  /* Bestaande namen, nu in de nieuwe stijl */
+  --color-coral: #c8410b;
+  --color-mint: #5fa77a;
+
+  /* CRM en kalender: functioneel, nooit het merkoranje */
+  --color-st-open: #2f6fd0;
+  --color-st-todo: #c99700;
+  --color-st-sent: #7c3aed;
+  --color-st-won: #1b7f46;
+  --color-st-option: #0b7f7a;
+  --color-st-lost: #d93636;
+  --color-st-expired: #9c9187;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Tekst die in beeld schuift zodra hij zichtbaar wordt (zie Reveal) */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.reveal[data-shown="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Trage zoom op de foto die in beeld is (zie Slideshow) */
+@keyframes kenburns {
+  from { transform: scale(1); }
+  to { transform: scale(1.1); }
+}
+.kenburns {
+  animation: kenburns 9s ease-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kenburns { animation: none; }
 }

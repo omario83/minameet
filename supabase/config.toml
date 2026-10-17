@@ -1,0 +1,59 @@
+# Lokale Supabase-omgeving (`supabase start`). Mails verschijnen in Inbucket: http://127.0.0.1:54324
+# Na een wijziging: `supabase stop` en `supabase start`.
+project_id = "minameet"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+
+[db]
+port = 54322
+shadow_port = 54320
+# Gelijk houden aan productie (controleer met `SHOW server_version;`).
+major_version = 17
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+# De callback krijgt een ?next=-parameter mee, daarom een patroon in plaats van één exacte URL.
+additional_redirect_urls = ["http://localhost:3000/**"]
+jwt_expiry = 3600
+enable_signup = true
+minimum_password_length = 10
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+double_confirm_changes = true
+# Lokaal geen Supabase-limiet tussen mails; de app handhaaft zelf de wachttijd (AUTH_RESEND_COOLDOWN_SECONDS).
+max_frequency = "1s"
+otp_expiry = 3600
+
+[auth.email.template.confirmation]
+subject = "Bevestig je e-mailadres voor MinaMeet"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Kies een nieuw wachtwoord voor MinaMeet"
+content_path = "./supabase/templates/recovery.html"
+
+[auth.email.template.email_change]
+subject = "Bevestig je nieuwe e-mailadres voor MinaMeet"
+content_path = "./supabase/templates/email_change.html"
+
+[auth.email.template.magic_link]
+subject = "Je inloglink voor MinaMeet"
+content_path = "./supabase/templates/magic_link.html"
