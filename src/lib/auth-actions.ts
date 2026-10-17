@@ -84,6 +84,11 @@ async function signUp(
     if (error.code === "user_already_exists") return checkMail();
     if (error.code === "captcha_failed") return { error: CAPTCHA_FAILED };
     if (error.code === "weak_password") return { error: "Kies een sterker wachtwoord." };
+    if (error.code === "over_email_send_rate_limit" || error.code === "over_request_rate_limit") {
+      return { error: "Er zijn te veel pogingen gedaan. Probeer het over een uur opnieuw." };
+    }
+    // Zonder deze regel is de oorzaak in de serverlog niet te achterhalen.
+    console.error("signUp mislukt", { role, status: error.status, code: error.code, message: error.message });
     return { error: "Registreren is niet gelukt. Controleer je gegevens of probeer het later opnieuw." };
   }
 
