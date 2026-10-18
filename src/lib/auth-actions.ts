@@ -2,10 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { ROLE_HOME, safeNext, type Role } from "@/lib/auth";
+import { ROLE_HOME, getProfile, safeNext, type Role } from "@/lib/auth";
 import { PARTNER_TERMS_VERSION } from "@/lib/legal";
 import { getPendingEmail, resendCooldownSeconds, setPendingEmail } from "@/lib/pending-email";
-import { VENDOR_HOME_PATH, VENDOR_RESET_PATH, callbackNext, vendorLoginDestination } from "@/lib/redirects";
+import { VENDOR_HOME_PATH, VENDOR_RESET_PATH, callbackFailurePath, callbackNext, vendorLoginDestination } from "@/lib/redirects";
 import { vendorSignUpSchema } from "@/lib/schemas/vendor-signup";
 import { createClient } from "@/lib/supabase/server";
 
@@ -133,6 +133,23 @@ export async function resendConfirmation(_: ResendState, formData: FormData): Pr
   await setPendingEmail(email);
   // Dezelfde melding voor elk adres.
   return { message: "Is er een onbevestigd account voor dit adres, dan is er een nieuwe e-mail onderweg.", retryAfter: cooldown };
+}
+
+/** Pas bij de klik op de knop wordt de eenmalige code verbruikt, zodat mailscanners hem niet kunnen opmaken. */
+export async function confirmEmailLink(formData: FormData) {
+  const parsed = z
+    .object({ token_hash: z.string().min(1), type: z.enum(["recovery", "signup"]) })
+    .safeParse(Object.fromEntries(formData));
+  const next = formData.get("next");
+  if (!parsed.success) redirect(callbackFailurePath(next));
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.verifyOtp(parsed.data);
+  if (error) redirect(callbackFailurePath(next));
+
+  const profile = await getProfile();
+  if (!profile) redirect(callbackFailurePath(next));
+  redirect(callbackNext(next, profile.role) ?? ROLE_HOME[profile.role]);
 }
 
 export async function requestVendorPasswordReset(_: FormState, formData: FormData): Promise<FormState> {

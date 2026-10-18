@@ -31,8 +31,9 @@ describe.each(TEMPLATES)("template %s", (type) => {
 
   it("heeft een oranje knop met de bevestigingslink en een tekstlink als terugval", () => {
     expect(html).toContain("#ff8a00");
-    expect(html.match(/\{\{ \.ConfirmationURL \}\}/g)?.length).toBeGreaterThanOrEqual(2);
-    expect(html).toContain('<a href="{{ .ConfirmationURL }}"');
+    const link = /\{\{ \.ConfirmationURL \}\}|\{\{ \.SiteURL \}\}\/auth\/bevestigen\?token_hash=\{\{ \.TokenHash \}\}/g;
+    expect(html.match(link)?.length).toBeGreaterThanOrEqual(2);
+    expect(html).toMatch(/<a href="(\{\{ \.ConfirmationURL \}\}|\{\{ \.SiteURL \}\}\/auth\/bevestigen\?)/);
   });
 
   it("is Nederlands en in de huisstijl", () => {
@@ -43,7 +44,7 @@ describe.each(TEMPLATES)("template %s", (type) => {
 
   it("gebruikt alleen bekende Supabase-variabelen", () => {
     const vars = [...html.matchAll(/\{\{\s*(\.[A-Za-z]+)\s*\}\}/g)].map((m) => m[1]);
-    for (const name of vars) expect([".ConfirmationURL", ".SiteURL", ".Email", ".NewEmail"]).toContain(name);
+    for (const name of vars) expect([".ConfirmationURL", ".SiteURL", ".TokenHash", ".Email", ".NewEmail"]).toContain(name);
   });
 });
 
