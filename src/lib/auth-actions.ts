@@ -145,7 +145,10 @@ export async function confirmEmailLink(formData: FormData) {
 
   const supabase = await createClient();
   const { error } = await supabase.auth.verifyOtp(parsed.data);
-  if (error) redirect(callbackFailurePath(next));
+  if (error) {
+    console.error("verifyOtp mislukt", { type: parsed.data.type, status: error.status, code: error.code, message: error.message });
+    redirect(callbackFailurePath(next));
+  }
 
   const profile = await getProfile();
   if (!profile) redirect(callbackFailurePath(next));

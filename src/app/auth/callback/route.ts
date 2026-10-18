@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) console.error("exchangeCodeForSession mislukt", { status: error.status, code: error.code, message: error.message });
     if (!error) {
       const profile = await getProfile();
       if (profile) {

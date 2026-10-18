@@ -1,14 +1,21 @@
+import { Suspense } from "react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { confirmEmailLink } from "@/lib/auth-actions";
 
 export const metadata = { robots: { index: false } };
 
+type Params = Promise<{ token_hash?: string; type?: string; next?: string }>;
+
 // Landingspunt van de link in een mail. De code wordt pas verbruikt na een klik, niet bij het openen van de pagina.
-export default async function ConfirmEmailPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ token_hash?: string; type?: string; next?: string }>;
-}) {
+export default function ConfirmEmailPage({ searchParams }: { searchParams: Params }) {
+  return (
+    <Suspense fallback={null}>
+      <ConfirmEmail searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function ConfirmEmail({ searchParams }: { searchParams: Params }) {
   const { token_hash = "", type = "", next = "" } = await searchParams;
   const isReset = type === "recovery";
 
