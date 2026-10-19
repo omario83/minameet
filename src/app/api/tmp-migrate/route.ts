@@ -1,4 +1,3 @@
-import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { Client } from "pg";
 import { STEP1, STEP2 } from "@/lib/tmp-migration-sql";
@@ -18,11 +17,12 @@ async function inTransaction(client: Client, sql: string) {
 }
 
 export async function POST(request: NextRequest) {
-  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const given = request.headers.get("authorization") ?? "";
-  const expected = `Bearer ${secret}`;
-  const ok = !!secret && given.length === expected.length && timingSafeEqual(Buffer.from(given), Buffer.from(expected));
-  if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Alleen wie de service-role-sleutel van dit project heeft, komt erdoor: Supabase zelf controleert de sleutel.
+  const key = (request.headers.get("authorization") ?? "").replace(/^Bearer /, "");
+  const check = key
+    ? await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/admin/users?per_page=1`, { headers: { apikey: key, Authorization: `Bearer ${key}` } })
+    : null;
+  if (!check?.ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const url = process.env.POSTGRES_URL_NON_POOLING ?? process.env.POSTGRES_URL;
   if (!url) return NextResponse.json({ error: "Geen POSTGRES_URL in deze omgeving" }, { status: 500 });
