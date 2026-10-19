@@ -24,11 +24,8 @@ export async function POST(request: NextRequest) {
     : null;
   if (!check?.ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const url = process.env.POSTGRES_URL_NON_POOLING ?? process.env.POSTGRES_URL ?? process.env.SUPABASE_DB_URL ?? process.env.DATABASE_URL;
-  if (!url) {
-    const names = Object.keys(process.env).filter((n) => /POSTGRES|DATABASE|DB_|PG|SUPABASE/i.test(n));
-    return NextResponse.json({ error: "Geen databaseverbinding in deze omgeving", names }, { status: 500 });
-  }
+  const url = process.env.POSTGRES_URL_NON_POOLING ?? process.env.POSTGRES_URL;
+  if (!url) return NextResponse.json({ error: "Geen POSTGRES_URL in deze omgeving" }, { status: 500 });
 
   const client = new Client({ connectionString: url, ssl: { rejectUnauthorized: false } });
   const done: string[] = [];
