@@ -1,7 +1,10 @@
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 export async function createClient() {
+  // De Supabase-client leest de huidige tijd om de sessie te controleren; dat mag niet tijdens (runtime-)prerendering.
+  await connection();
   const cookieStore = await cookies();
 
   return createServerClient(

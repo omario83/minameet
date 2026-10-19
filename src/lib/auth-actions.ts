@@ -189,6 +189,8 @@ async function signIn(role: Role, formData: FormData): Promise<FormState> {
     ...parsed.data,
     options: { captchaToken: captchaToken(formData) },
   });
+  // Zonder deze regel is niet te zien waarom een login mislukt (alle fouten tonen dezelfde melding).
+  if (error) console.error("signIn mislukt", { role, status: error.status, code: error.code, message: error.message });
   if (error?.code === "captcha_failed") return { error: CAPTCHA_FAILED };
   if (error?.code === "email_not_confirmed") {
     // Supabase meldt dit pas als het wachtwoord klopt, dus het adres is van deze persoon.
@@ -200,7 +202,8 @@ async function signIn(role: Role, formData: FormData): Promise<FormState> {
   }
   if (error || !data.user) return { error: "E-mailadres of wachtwoord klopt niet." };
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.user.id).single();
+  const { data: profile, error: profileError } = await supabase.from("profiles").select("role").eq("id", data.user.id).single();
+  if (profile?.role !== role) console.error("signIn: profiel/rol klopt niet", { role, found: profile?.role ?? null, code: profileError?.code, message: profileError?.message });
 
   // Klant- en leveranciersaccounts zijn gescheiden: een verkeerd accounttype logt hier niet in.
   if (profile?.role !== role) {

@@ -1,5 +1,6 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { connection } from "next/server";
 import { cookies } from "next/headers";
 
 // Het adres waarheen de laatste bevestigingsmail ging, ondertekend zodat het niet via een URL of cookie te vervalsen is.
@@ -60,6 +61,7 @@ export async function getPendingEmail(): Promise<{ email: string; sentAt: number
 
 /** Het adres en de resterende wachttijd (seconden) voor de pagina 'controleer je e-mail'. */
 export async function getResendStatus() {
+  await connection();
   const pending = await getPendingEmail();
   const secondsLeft = pending?.sentAt ? Math.max(0, Math.ceil(resendCooldownSeconds() - (Date.now() - pending.sentAt) / 1000)) : 0;
   return { email: pending?.email ?? null, secondsLeft };
